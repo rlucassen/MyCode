@@ -1,0 +1,77 @@
+﻿@media only screen and (max-width: 64em) {
+  table {
+    &.small-blocks {
+      display: block;
+
+      thead {
+        display: block;
+      }
+
+      tbody {
+        display: block;
+
+        tr {
+          display: block;
+        }
+      }
+
+      thead tr th, tbody tr td {
+        display: block;
+      }
+
+      border: none;
+
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+
+      tr {
+        border: 1px solid #ddd;
+        margin-bottom: 1em;
+        position: relative;
+      }
+
+      tbody tr td {
+        border: none;
+        position: relative;
+        padding-top: 0;
+      }
+
+      td {
+        &.id {
+          position: absolute;
+          z-index: 9;
+          top: 0.6em;
+          left: 1em;
+          font-size: 1.5em;
+
+          &:after {
+            content: ':';
+          }
+        }
+
+        &.name {
+          font-size: 1.5em;
+          background-color: #e7e7e7;
+        }
+      }
+    }
+
+    &.small-blocks td {
+      &.address:before {
+        content: "Address: ";
+      }
+      &.city:before {
+        content: "City: ";
+      }
+      &.phone:before {
+        content: "T: ";
+      }
+      &.email:before {
+        content: "E: ";
+      }
+    }
+  }
+}

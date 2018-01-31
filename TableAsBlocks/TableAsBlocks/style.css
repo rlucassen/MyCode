@@ -1,0 +1,44 @@
+﻿@media only screen and (max-width: 64em) {
+  table.small-blocks {
+    display: block;
+    border: none; }
+    table.small-blocks thead {
+      display: block; }
+    table.small-blocks tbody {
+      display: block; }
+      table.small-blocks tbody tr {
+        display: block; }
+    table.small-blocks thead tr th, table.small-blocks tbody tr td {
+      display: block; }
+    table.small-blocks thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px; }
+    table.small-blocks tr {
+      border: 1px solid #ddd;
+      margin-bottom: 1em;
+      position: relative; }
+    table.small-blocks tbody tr td {
+      border: none;
+      position: relative;
+      padding-top: 0; }
+    table.small-blocks td.id {
+      position: absolute;
+      z-index: 9;
+      top: 0.6em;
+      left: 1em;
+      font-size: 1.5em; }
+      table.small-blocks td.id:after {
+        content: ':'; }
+    table.small-blocks td.name {
+      font-size: 1.5em;
+      background-color: #e7e7e7; }
+  table.small-blocks td.address:before {
+    content: "Address: "; }
+  table.small-blocks td.city:before {
+    content: "City: "; }
+  table.small-blocks td.phone:before {
+    content: "T: "; }
+  table.small-blocks td.email:before {
+    content: "E: "; } }
+
