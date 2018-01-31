@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+</head>
+<body>
+  <a href="#" id="toggle-infowindows">Toggle info</a>
+  <div id="map-canvas" style="height: 600px; width: 100%;"></div>
+  </div>
+  <script src="/jquery-3.3.1.min.js"></script>
+  <script>
+
+    var map;
+    var infoWindows = [];
+    var infoWindowsVisible = false;
+    var colors = ['#c32026', '#e0582c', '#ca5e2d'];
+    var colorIndex = 0;
+    var allPoints = [];
+    function initMap() {
+      google.maps.InfoWindow.prototype.isOpen = function () {
+        var map = this.getMap();
+        return (map !== null && typeof map !== "undefined");
+      };
+
+      $('#toggle-infowindows').click(function (e) {
+        e.preventDefault();
+        toggleInfoWindows();
+      });
+
+      function initialize() {
+        var maxStroke = 8;
+        var center = new google.maps.LatLng(26.38786624218402, 5.544817871093759); // center of earth :P
+        var mapOptions = {
+          zoom: 2,
+          center: center,
+          streetViewControl: false
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        var lineSymbol = {
+          path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+          scale: 2,
+          strokeColor: '#000000'
+        };
+
+        $.ajax({
+          url: '/data.json',
+          method: 'GET',
+          success: function (data) {
+            var bounds = new google.maps.LatLngBounds();
+            for (var i in data.Items) {
+              var item = data.Items[i];
+              var lineStart = new google.maps.LatLng(item.Home.Lat, item.Home.Long);
+              var lineEnd = new google.maps.LatLng(item.Host.Lat, item.Host.Long);
+              bounds.extend(lineStart);
+              bounds.extend(lineEnd);
+              var linePath = calculateCurvedCoords(lineStart, lineEnd);
+              var line = new google.maps.Polyline({
+                path: linePath,
+                strokeColor: colors[colorIndex % colors.length],
+                strokeOpacity: 1.0,
+                strokeWeight: (item.Count * maxStroke / data.MaxCount) + 1,
+                icons: [{
+                  icon: lineSymbol,
+                  offset: '45%'
+                }]
+              });
+              colorIndex++;
+              var infowindow = new google.maps.InfoWindow({
+                content: '<strong>' + item.Home.Name + '</strong> to <strong>' + item.Host.Name + '</strong> (' + item.Count + ')',
+                disableAutoPan: true
+              });
+              infowindow.setPosition(linePath[5]);
+              infoWindows.push(infowindow);
+              line.infoWindow = infowindow;
+              google.maps.event.addListener(line, 'click', function (a) {
+                if (!this.infoWindow.isOpen()) {
+                  this.infoWindow.open(map);
+                  infoWindowsVisible = true;
+                }
+                this.infoWindow.setPosition(a.latLng);
+              });
+              line.setMap(map);
+            }
+            map.fitBounds(bounds);
+          }
+        });
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    };
+
+    var toggleInfoWindows = function () {
+      for (var i in infoWindows) {
+        var infowindow = infoWindows[i];
+        if (infoWindowsVisible) {
+          infowindow.close();
+        } else {
+          infowindow.open(map);
+        }
+      }
+      infoWindowsVisible = !infoWindowsVisible;
+    }
+
+    var calculateCurvedCoords = function (start, end) {
+      var latLngs = [];
+
+      var multiplier = 0.5;
+      var points = [];
+      var pointsOffset = [];
+
+      for (point = 0; point <= 1; point += 0.1) {
+        points.push(point);
+        offset = (0.6 * Math.sin((Math.PI * point / 1)));
+        pointsOffset.push(offset);
+      }
+
+      var offsetMultiplier;
+      var offsetLength;
+
+      var horizontal = Math.abs(start.lat() - end.lat()) < Math.abs(start.lng() - end.lng());
+
+      if (horizontal) {
+        offsetLength = (end.lng() - start.lng()) * 0.1;
+      } else {
+        offsetLength = (end.lat() - start.lat()) * 0.1;
+      }
+      for (var i = 0; i < points.length; i++) {
+
+        if (i >= points.length / 2) {
+          offsetMultiplier = (offsetLength * pointsOffset[i]) * multiplier;
+        } else {
+          offsetMultiplier = (offsetLength * pointsOffset[i]) * multiplier;
+        }
+
+        if (horizontal) {
+          partLat = (start.lat() + ((end.lat() - start.lat()) * points[i])) + offsetMultiplier;
+          partLng = (start.lng() + ((end.lng() - start.lng()) * points[i]));
+        } else {
+          partLat = (start.lat() + ((end.lat() - start.lat()) * points[i]));
+          partLng = (start.lng() + ((end.lng() - start.lng()) * points[i])) + offsetMultiplier;
+        }
+
+        latLngs.push(new google.maps.LatLng(partLat, partLng));
+      }
+      return latLngs;
+    };
+
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDTecOk08oMBpnhwt63HIkLcEarv_dWGNo&callback=initMap" async defer></script>
+</body>
+</html>
